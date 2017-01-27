@@ -1,0 +1,46 @@
+# Django app
+app:
+    build: ./app
+    restart: always
+    expose:
+        - "8000"
+    volumes:
+        - ./app:/app
+        - ./logs:/logs/
+        - ./app/static:/app/django/static
+    links:
+        - postgres
+    command: --reload
+    environment:
+        - APP_ENVIRONMENT=local
+        - DB_USER=postgres
+        - DB_PASS=postgres
+        - DB_NAME=postgres
+        - DB_HOST=postgres
+        - DB_PORT=5432
+        - DB_CHECK_TIMEOUT=30
+        - DJANGO_SECRET_KEY=ABCDDEFGHI
+        - TWILIO_ACCOUNT_SID=12345678
+        - TWILIO_AUTH_TOKEN=12345678
+        - TWILIO_FROM_NUMBER=12345678
+
+# Nginx
+nginx:
+    build: ./nginx/
+    restart: always
+    ports:
+        - "80:80"
+    volumes_from:
+        - app
+    links:
+        - app
+
+# Postgres DB
+postgres:
+    image: postgres:9.4.5
+    restart: always
+    volumes:
+        - /var/lib/postgresql
+    ports:
+        - "5432:5432"
+
